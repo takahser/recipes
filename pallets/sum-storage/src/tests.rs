@@ -1,5 +1,9 @@
 use crate::{self as sum_storage, Config};
 
+// Import `pallet_nova` and dependencies
+pub use pallet_nova::*;
+use rand_core::SeedableRng;
+
 use frame_support::{assert_ok, construct_runtime, parameter_types};
 use sp_core::H256;
 use sp_runtime::{
@@ -11,14 +15,16 @@ type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<TestRunt
 type Block = frame_system::mocking::MockBlock<TestRuntime>;
 
 construct_runtime!(
-	pub enum TestRuntime where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		System: frame_system::{Module, Call, Config, Storage, Event<T>},
-		SumStorage: sum_storage::{Module, Call, Storage, Event<T>},
-	}
+    pub enum TestRuntime where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Module, Call, Config, Storage, Event<T>},
+        // Define the `pallet-nova` in `contruct_runtime`
+        Nova: pallet_nova::{Module, Call, Storage},
+        {YourPallet}: {your_pallet}::{Module, Call, Storage},
+    }
 );
 
 parameter_types! {

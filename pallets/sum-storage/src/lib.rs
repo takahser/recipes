@@ -13,10 +13,11 @@ mod tests;
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
+    use pallet_nova::{PublicParams, RecursiveProof};
 
 	/// The module's configuration trait.
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + pallet_nova::Config {}
 		/// The overarching event type.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 	}
@@ -44,18 +45,24 @@ pub mod pallet {
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
 	// The module's dispatchable functions.
-	#[pallet::call]
-	impl<T: Config> Pallet<T> {
-		/// Sets the first simple storage value
-		#[pallet::weight(10_000)]
-		pub fn set_thing_1(origin: OriginFor<T>, val: u32) -> DispatchResultWithPostInfo {
-			let _ = ensure_signed(origin)?;
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+        /// Sets the first simple storage value
+        #[pallet::weight(10_000)]
+        pub fn set_thing_1(
+            origin: OriginFor<T>,
+            val: u32,
+            proof: Proof,
+            public_inputs: Vec<Fr>,
+        ) -> DispatchResultWithPostInfo {
+            // Use the proof verification
+            pallet_nova::Pallet::<T>::verify(origin, proof, pp)?;
 
-			Thing1::<T>::put(val);
+            Thing1::<T>::put(val);
 
-			Self::deposit_event(Event::ValueSet(1, val));
-			Ok(().into())
-		}
+            Self::deposit_event(Event::ValueSet(1, val));
+            Ok(().into())
+        }
 
 		/// Sets the second stored value
 		#[pallet::weight(10_000)]
